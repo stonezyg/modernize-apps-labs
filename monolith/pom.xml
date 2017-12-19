@@ -136,10 +136,10 @@
                     </add-user>
                      <resources>
                         <resource>
-                            <address>subsystem=messaging-activemq,server=default,jms-queue=orders</address>
+                            <address>subsystem=messaging-activemq,server=default,jms-topic=orders</address>
                             <properties>
                                 <durable>false</durable>
-                                <entries>!!["queue/orders"]</entries>
+                                <entries>!!["topic/orders"]</entries>
                             </properties>
                         </resource>
                     </resources>

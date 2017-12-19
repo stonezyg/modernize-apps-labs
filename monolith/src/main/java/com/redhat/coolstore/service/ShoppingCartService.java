@@ -8,7 +8,7 @@ import javax.annotation.Resource;
 import javax.ejb.Stateful;
 import javax.inject.Inject;
 import javax.jms.JMSContext;
-import javax.jms.Queue;
+import javax.jms.Topic;
 
 import com.redhat.coolstore.model.Product;
 import com.redhat.coolstore.model.ShoppingCart;
@@ -33,8 +33,8 @@ public class ShoppingCartService {
     @Inject
     private JMSContext context;
 
-    @Resource(lookup = "java:/queue/orders")
-    private Queue ordersQueue;
+    @Resource(lookup = "java:/topic/orders")
+    private Topic ordersTopic;
 
     private Map<String, ShoppingCart> carts = new HashMap<>(); //Each user can have multiple shopping carts (tabbed browsing)
 
@@ -53,7 +53,7 @@ public class ShoppingCartService {
 
     public ShoppingCart checkOutShoppingCart(String cartId) {
         ShoppingCart cart = this.getShoppingCart(cartId);
-        context.createProducer().send(ordersQueue, Transformers.shoppingCartToJson(cart));
+        context.createProducer().send(ordersTopic, Transformers.shoppingCartToJson(cart));
         cart.resetShoppingCartItemList();
         priceShoppingCart(cart);
         return cart;

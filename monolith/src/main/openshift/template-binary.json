@@ -278,7 +278,7 @@
                                     "value": "coolstore-postgresql=DB"
                                 },
                                 {
-                                    "name": "MQ_QUEUES",
+                                    "name": "MQ_TOPICS",
                                     "value": "orders"
                                 },
                                 {

@@ -320,7 +320,7 @@
                                     "value": "mykeystorepass"
                                 },
                                 {
-                                    "name": "MQ_QUEUES",
+                                    "name": "MQ_TOPICS",
                                     "value": "orders"
                                 },
                                 {
