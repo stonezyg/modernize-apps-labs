@@ -50,72 +50,10 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.2.0</version>
             </plugin>
-            <plugin>
-                <groupId>org.wildfly.plugins</groupId>
-                <artifactId>wildfly-maven-plugin</artifactId>
-                <version>1.2.1.Final</version>
-                <executions>
-                    <execution>
-                        <id>add-resource-and-deploy</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>start</goal>
-                            <goal>add-resource</goal>
-                            <goal>deploy</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>undeploy</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>undeploy</goal>
-                            <goal>shutdown</goal>
-                        </goals>
-                        <configuration>
-                            <ignoreMissingDeployment>true</ignoreMissingDeployment>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <jboss-home>${env.JBOSS_HOME}</jboss-home>
-                    <server-config>standalone-full.xml</server-config>
-                    <resources>
-                        <resource>
-                            <address>subsystem=messaging-activemq,server=default,jms-topic=orders</address>
-                            <addIfAbsent>true</addIfAbsent>
-                            <properties>
-                                <durable>false</durable>
-                                <entries>!!["topic/orders"]</entries>
-                            </properties>
-                        </resource>
-                    </resources>
-                </configuration>
-            </plugin>
+            <!-- TODO: Add wildfly plugin here -->
         </plugins>
     </build>
     <profiles>
-        <profile>
-            <id>openshift</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-war-plugin</artifactId>
-                        <version>2.6</version>
-                        <configuration>
-                            <webResources>
-                                <resource>
-                                    <directory>${basedir}/src/main/webapp/WEB-INF</directory>
-                                    <filtering>true</filtering>
-                                    <targetPath>WEB-INF</targetPath>
-                                </resource>
-                            </webResources>
-                            <outputDirectory>deployments</outputDirectory>
-                            <warName>ROOT</warName>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+        <!-- TODO: Add OpenShift profile here -->
     </profiles>
-
 </project>
