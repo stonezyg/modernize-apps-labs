@@ -7,81 +7,32 @@
     <artifactId>monolith</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>monolith</name>
-    <repositories>
-        <repository>
-            <id>jboss-maven-repository</id>
-            <name>JBoss Maven Repository</name>
-            <url>http://maven.repository.redhat.com/ga/</url>
-            <layout>default</layout>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>apache-maven-repository</id>
-            <name>Apache Maven Repository</name>
-            <url>http://repo.maven.apache.org/maven2/</url>
-            <layout>default</layout>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>jboss-maven-repository</id>
-            <name>JBoss Maven Repository</name>
-            <url>http://maven.repository.redhat.com/ga/</url>
-            <layout>default</layout>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </pluginRepository>
-        <pluginRepository>
-            <id>apache-maven-repository</id>
-            <name>Apache Maven Repository</name>
-            <url>http://repo.maven.apache.org/maven2/</url>
-            <layout>default</layout>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
+    <name>coolstore-monolith</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyyMMdd'T'HHmmss</maven.build.timestamp.format>
-        <hystrix.version>1.5.1</hystrix.version>
         <project.encoding>UTF-8</project.encoding>
-        <!-- configurem m2e facets -->
-        <m2e.jaxrs.activation>false</m2e.jaxrs.activation>
-        <m2e.jpa.activation>false</m2e.jpa.activation>
-        <m2e.jsf.activation>false</m2e.jsf.activation>
         <maven.test.skip>true</maven.test.skip>
-        <javax.persistence.schema-generation.database.action>none</javax.persistence.schema-generation.database.action>
-        <hibernate.show_sql>true</hibernate.show_sql>
-        <hibernate.dialect>org.hibernate.dialect.H2Dialect</hibernate.dialect>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-web-api</artifactId>
+            <version>7.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>7.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>4.1.2</version>
+        </dependency>
+    </dependencies>
     <build>
         <finalName>ROOT</finalName>
         <plugins>
@@ -98,141 +49,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.2.0</version>
-                <configuration>
-                    <webResources>
-                        <resource>
-                            <directory>${basedir}/src/main/config/h2</directory>
-                            <filtering>false</filtering>
-                            <includes>
-                                <include>**/*.sql</include>
-                            </includes>
-                            <targetPath>WEB-INF/classes</targetPath>
-                        </resource>
-                        <resource>
-                            <directory>${basedir}/src/main/config</directory>
-                            <filtering>true</filtering>
-                            <includes>
-                                <include>**/persistence.xml</include>
-                            </includes>
-                            <targetPath>WEB-INF/classes</targetPath>
-                        </resource>
-                    </webResources>
-                </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.wildfly.plugins</groupId>
-                <artifactId>wildfly-maven-plugin</artifactId>
-                <version>1.2.1.Final</version>
-                <configuration>
-                    <jboss-home>${env.JBOSS_HOME}</jboss-home>
-                    <server-config>standalone-full.xml</server-config>
-                    <add-user>
-                        <users>
-                            <user>
-                                <username>admin</username>
-                                <password>admin123</password>
-                            </user>
-                        </users>
-                    </add-user>
-                     <resources>
-                        <resource>
-                            <address>subsystem=messaging-activemq,server=default,jms-topic=orders</address>
-                            <properties>
-                                <durable>false</durable>
-                                <entries>!!["topic/orders"]</entries>
-                            </properties>
-                        </resource>
-                    </resources>
-                </configuration>
-            </plugin>
+            <!-- TODO: Add wildfly plugin here -->
         </plugins>
     </build>
     <profiles>
-        <profile>
-            <id>openshift</id>
-            <properties>
-                <javax.persistence.schema-generation.database.action>none</javax.persistence.schema-generation.database.action>
-                <hibernate.show_sql>false</hibernate.show_sql>
-                <hibernate.dialect>org.hibernate.dialect.PostgreSQLDialect</hibernate.dialect>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-war-plugin</artifactId>
-                        <version>3.2.0</version>
-                        <configuration>
-                            <webResources>
-                                <resource>
-                                    <directory>src/main/config/postgresql</directory>
-                                    <filtering>false</filtering>
-                                    <includes>
-                                        <include>**/*.sql</include>
-                                    </includes>
-                                    <targetPath>WEB-INF/classes</targetPath>
-                                </resource>
-                                <resource>
-                                    <directory>src/main/config</directory>
-                                    <filtering>true</filtering>
-                                    <includes>
-                                        <include>**/persistence.xml</include>
-                                    </includes>
-                                    <targetPath>WEB-INF/classes</targetPath>
-                                </resource>
-                            </webResources>
-                            <packagingExcludes>WEB-INF/*-ds.xml</packagingExcludes>
-                            <outputDirectory>deployments</outputDirectory>
-                            <warName>ROOT</warName>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+        <!-- TODO: Add OpenShift profile here -->
     </profiles>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.jboss.bom</groupId>
-                <artifactId>jboss-eap-javaee7</artifactId>
-                <version>7.0.0.GA</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-web-api</artifactId>
-            <version>7.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <version>7.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.spec.javax.jms</groupId>
-            <artifactId>jboss-jms-api_2.0_spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.9</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>2.6.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <version>4.1.2</version>
-        </dependency>
-    </dependencies>
 </project>
