@@ -7,12 +7,12 @@
             "iconClass": "icon-jboss",
             "tags": "eap,postgresql,javaee,java,database,jboss,xpaas",
             "version": "1.0.0",
-            "openshift.io/display-name": "Red Hat Demos - Coolstore Monnolith using binary build"
+            "openshift.io/display-name": "Coolstore Monolith using Git Source"
         },
-        "name": "coolstore-monolith-demo"
+        "name": "coolstore-monolith-src-build"
     },
     "labels": {
-        "template": "coolstore-monolith-demo"
+        "template": "coolstore-monolith-src-build"
     },
     "message": "The resources (build config, deploy config, service, imagestreams, etc) for running the Coolstore Monolith demo has been created in your project. To deploy the application go to your source directoy and build that code using mvn -Popenshift package and then start the build using oc start-build coolstore --from-file=deployments/ROOT.war.",
     "parameters": [
@@ -112,8 +112,9 @@
             "spec": {
                 "source": {
                     "type": "Git",
+                    "contextDir": "monolith",
                     "git": {
-                        "uri": "https://github.com/coolstore/monolith.git"
+                        "uri": "https://github.com/RedHat-Middleware-Workshops/modernize-apps-labs"
                     }
                 },
                 "strategy": {
