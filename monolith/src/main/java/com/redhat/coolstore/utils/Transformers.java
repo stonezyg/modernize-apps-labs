@@ -10,6 +10,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -18,6 +19,7 @@ import javax.json.JsonReader;
 import javax.json.JsonWriter;
 
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Logger;
 
 /**
  * Created by tqvarnst on 2017-03-30.
@@ -27,15 +29,21 @@ public class Transformers {
     private static final String[] RANDOM_NAMES = {"Sven Karlsson","Johan Andersson","Karl Svensson","Anders Johansson","Stefan Olson","Martin Ericsson"};
     private static final String[] RANDOM_EMAILS = {"sven@gmail.com","johan@gmail.com","karl@gmail.com","anders@gmail.com","stefan@gmail.com","martin@gmail.com"};
 
+    private static Logger log = Logger.getLogger(Transformers.class.getName());
+
     public static Product toProduct(CatalogItemEntity entity) {
         ProductImpl prod = new ProductImpl();
         prod.setItemId(entity.getItemId());
         prod.setName(entity.getName());
         prod.setDesc(entity.getDesc());
         prod.setPrice(entity.getPrice());
-        prod.setLocation(entity.getInventory().getLocation());
-        prod.setLink(entity.getInventory().getLink());
-        prod.setQuantity(entity.getInventory().getQuantity());
+        if (entity.getInventory() != null) {
+            prod.setLocation(entity.getInventory().getLocation());
+            prod.setLink(entity.getInventory().getLink());
+            prod.setQuantity(entity.getInventory().getQuantity());
+        } else {
+            log.warning("Inventory for " + entity.getName() + "[" + entity.getItemId()+ "] unknown and missing");
+        }
         return prod;
     }
 
