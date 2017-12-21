@@ -28,6 +28,8 @@ public class ProductService {
         CatalogItemEntity entity = cm.getCatalogItemById(itemId);
         if (entity == null)
             return null;
+
+        // Return the entity
         return Transformers.toProduct(entity);
     }
 
