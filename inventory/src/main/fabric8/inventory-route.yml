@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Route
 metadata:
-  name: inventory
+  name: ${project.artifactId}
 spec:
   port:
     targetPort: 8080
