@@ -5,6 +5,7 @@ import com.redhat.coolstore.model.Product;
 import io.specto.hoverfly.junit.dsl.HttpBodyConverter;
 import io.specto.hoverfly.junit.rule.HoverflyRule;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,6 @@ public class CatalogServiceTest {
     @ClassRule
     public static HoverflyRule hoverflyRule = HoverflyRule.inSimulationMode(dsl(
             service("inventory:8080")
-// TODO: Add a deleay
 //                  .andDelay(500, TimeUnit.MILLISECONDS).forMethod("GET")
                     .get("/services/inventory/165613")
                         .willReturn(success(json(new Inventory("165613",13))))
@@ -54,18 +54,6 @@ public class CatalogServiceTest {
                         .willReturn(success(json(new Inventory("444436",30))))
 
     ));
-
-
-    @Test
-    public void insert_and_delete() throws Exception {
-        Product newProduct = new Product();
-        newProduct.setItemId("99999");
-        newProduct.setName("Test Proudct 2");
-        newProduct.setPrice(100.0);
-        newProduct.setDesc("This is just a test proudct");
-        catalogService.insert(newProduct);
-        catalogService.delete(newProduct.getItemId());
-    }
 
     @Test
     public void read() throws Exception {
@@ -90,15 +78,5 @@ public class CatalogServiceTest {
         List<String> names = productList.stream().map(Product::getName).collect(Collectors.toList());
         assertThat(names).contains("Red Fedora","Forge Laptop Sticker","Oculus Rift");
     }
-
-    @Test
-    public void update() throws Exception {
-        Product product = catalogService.read("444434");
-        assertThat(product).isNotNull();
-        assertThat(product.getName()).as("Verify product name").isEqualTo("Pebble Smart Watch");
-        product.setPrice(9999.9);
-        catalogService.update(product);
-    }
-
 
 }

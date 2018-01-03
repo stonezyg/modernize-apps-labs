@@ -28,25 +28,4 @@ public class CatalogEndpoint {
         return new ResponseEntity<Product>(catalogService.read(id),HttpStatus.OK);
     }
 
-    @ResponseBody
-    @PutMapping("/product")
-    public ResponseEntity<Void> update(@RequestBody Product product) {
-        catalogService.update(product);
-        return new ResponseEntity<Void>(HttpStatus.OK);
-    }
-
-    @ResponseBody
-    @PostMapping("/product/new")
-    public ResponseEntity<Void> create(@RequestBody Product product) {
-        catalogService.insert(product);
-        return new ResponseEntity<Void>(HttpStatus.OK);
-    }
-
-    @ResponseBody
-    @DeleteMapping("/product/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") String id) {
-        catalogService.delete(id);
-        return new ResponseEntity<Void>(HttpStatus.OK);
-    }
-
 }
