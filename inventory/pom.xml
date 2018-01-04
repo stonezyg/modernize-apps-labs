@@ -133,6 +133,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <jvmArguments>-Djava.net.preferIPv4Stack=true</jvmArguments>
                     <arguments>
                         <argument>-S</argument>
                         <argument>development</argument>
