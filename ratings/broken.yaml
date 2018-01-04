@@ -15,7 +15,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: ratings-v1-mongodb-broken
+  name: ratings-v1-broken
 spec:
   replicas: 1
   template:
