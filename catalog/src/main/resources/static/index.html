@@ -16,7 +16,7 @@
 <div class="jumbotron">
     <div class="container">
         <h1 class="display-3">CoolStore Catalog</h1>
-        <p>This shows the latest CoolStore Catalog from the Catalog microservice using <a href="http://wildfly-swarm.io">WildFly Swarm</a>.
+        <p>This shows the latest CoolStore Catalog from the Catalog microservice using Spring Boot.
         </p>
     </div>
 </div>
@@ -29,7 +29,6 @@
             <hr>
             <center>
                 <h1>The CoolStore Catalog</h1>
-                <h2>Status: <code id="statusCode">unknown</code> (Last Successful Fetch: <span id="fetchAge">never</span>)</h2>
             </center>
             <table class="table table-bordered" id="products" border='1'>
                 <tr>
@@ -76,7 +75,7 @@
         $.ajax(
             {
                 type: "GET",
-                url: '/services/catalog',
+                url: '/services/products',
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 cache: false,
@@ -91,7 +90,7 @@
                         trHTML += '<tr>' +
                             '<td>' + product.itemId + '</td>' +
                             '<td><strong>' + product.name + '</strong></td>' +
-                            '<td>' + product.description + '</a></td>' +
+                            '<td>' + product.desc + '</a></td>' +
                             '<td>' + product.price + '</a></td>' +
                             '<td>' + product.quantity + '</a></td>' +
                             '</tr>';
@@ -99,9 +98,6 @@
 
                     $('#products').find("tr:gt(0)").remove();
                     $('#products').append(trHTML);
-
-                    $('#statusCode').text("OK").css('color', 'green');
-                    $("#fetchAge").text("moments ago");
                 },
 
                 error: function (msg) {
