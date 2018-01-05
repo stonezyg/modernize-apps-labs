@@ -60,7 +60,7 @@
                      <resources>
                         <resource>
                             <addIfAbsent>true</addIfAbsent>
-                            <address>subsystem=datasources,data-source=java:jboss/CoolstoreDS</address>
+                            <address>subsystem=datasources,data-source=CoolstoreDS</address>
                             <properties>
                                 <jndi-name>java:jboss/CoolstoreDS</jndi-name>
                                 <enabled>true</enabled>
