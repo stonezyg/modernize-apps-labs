@@ -79,6 +79,9 @@
                             </properties>
                         </resource>
                     </resources>
+                    <server-args>
+                        <server-arg>-Djboss.https.port=9443</server-arg>
+                    </server-args>
                 </configuration>
             </plugin>
         </plugins>
