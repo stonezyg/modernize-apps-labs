@@ -82,11 +82,7 @@
                     <server-args>
                         <server-arg>-Djboss.https.port=9443</server-arg>
                     </server-args>
-                    <java-opts>
-                        <java-opt>-Xms256m</java-opt>
-                        <java-opt>-Xmx512m</java-opt>
-                        <java-opt>-Djava.net.preferIPv4Stack=true</java-opt>
-                    </java-opts>
+                    <javaOpts>-Xms256m -Xmx512m -Djava.net.preferIPv4Stack=true</javaOpts>
                 </configuration>
             </plugin>
         </plugins>
