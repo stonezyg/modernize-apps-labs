@@ -2,14 +2,13 @@ package com.redhat.coolstore.utils;
 
 import com.redhat.coolstore.MainVerticle;
 import com.redhat.coolstore.model.*;
-import com.redhat.coolstore.service.CartService;
-import com.redhat.coolstore.service.impl.CartServiceImpl;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.ext.web.client.WebClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +25,6 @@ import static org.junit.Assert.assertTrue;
 public class EndpointTest {
 
     private static final String SHOPPING_CART_ID = "00001";
-    CartService cartService = new CartServiceImpl();
     Vertx vertx;
     int port;
 
@@ -37,32 +35,50 @@ public class EndpointTest {
         port = socket.getLocalPort();
         socket.close();
         DeploymentOptions options = new DeploymentOptions()
-            .setConfig(new JsonObject().put("http.port", port));
+            .setConfig(new JsonObject().put("http.port", port)
+                .put("catalog.service.port",8081)
+                .put("catalog.service.hostname","localhost")
+                .put("catalog.service.timeout",2000)
+            );
         vertx.deployVerticle(MainVerticle.class.getName(), options, context.asyncAssertSuccess());
 
-//        System.out.println("Transformers.shoppingCartToJson(generateShoppingCart()).encodePrettily() = " + Transformers.shoppingCartToJson(generateShoppingCart()).encodePrettily());
     }
 
     @Test
-    public void getCart(TestContext context) {
-        final Async async = context.async();
+    public void testShoppingCartEndpoints(TestContext context) {
 
+        final Async async = context.async();
+        WebClient client = WebClient.create(vertx);
         CompletableFuture<Void> future1 = new CompletableFuture<>();
         CompletableFuture<Void> future2 =  new CompletableFuture<>();
 
-        cartService.addItems(SHOPPING_CART_ID,"329199",8, x -> future1.complete(null));
-        cartService.addItems(SHOPPING_CART_ID,"329299",3, x -> future2.complete(null));
+        //Add products
+        client.post(port,"localhost","/services/cart/" + SHOPPING_CART_ID + "/329299/2")
+            .timeout(5000)
+            .send(handler -> {
+                assertThat(handler.succeeded()).as("Adding product to shopping cart");
+                future1.complete(null);
+        });
+
+        //Add products
+        client.post(port,"localhost","/services/cart/" + SHOPPING_CART_ID + "/329199/5")
+            .timeout(5000)
+            .send(handler -> {
+                assertThat(handler.succeeded()).as("Adding product to shopping cart");
+                future2.complete(null);
+            });
+
 
         CompletableFuture.allOf(future1,future2).thenAccept( f -> {
             vertx.createHttpClient().getNow(port, "localhost", "/services/cart/" + SHOPPING_CART_ID, response -> {
                 response.handler(body -> {
                     try {
-                        System.out.println("body = " + body);
+                        assertThat(body).as("Body can't be null").isNotNull();
+                        assertThat(body.toJsonObject()).as("Body must be a JSON String").isNotNull();
                         ShoppingCart cart = Transformers.jsonToShoppingCart(body.toJsonObject());
-                        System.out.println("cart = " + cart);
-                        System.out.println("orderValue = " + cart.getCartTotal());
-                        System.out.println("retailPrice = " + cart.getCartItemTotal());
-                        assertThat(cart.getCartTotal()).as("The Cart Value should be 279.92").isEqualTo(279.92);
+                        assertThat(cart).as("Json must be able to transform into a shopping cart").isNotNull();
+                        assertThat(cart.getShoppingCartItemList().size()).as("The shopping cart has two entries").isEqualTo(2);
+                        assertThat(cart.getCartTotal()).as("The Cart Value should be 112.48").isEqualTo(112.48);
                     } finally {
                         async.complete();
                     }
@@ -70,6 +86,8 @@ public class EndpointTest {
                 });
             });
         });
+
+
 
 
 

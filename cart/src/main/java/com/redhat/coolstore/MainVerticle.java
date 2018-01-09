@@ -1,31 +1,89 @@
 package com.redhat.coolstore;
 
-import com.redhat.coolstore.service.CartService;
-import com.redhat.coolstore.service.impl.CartServiceImpl;
-import io.netty.handler.codec.http.HttpResponseStatus;
+import com.redhat.coolstore.model.*;
+import com.redhat.coolstore.utils.Transformers;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.client.WebClient;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MainVerticle extends AbstractVerticle {
 
-    private CartService cartService;
+    /**
+     * This is the HashMap that holds the shopping cart. This should be replace with a replicated cache like Infinispan etc
+     */
+    private final static Map<String,ShoppingCart> carts = new ConcurrentHashMap<>();
+
+
 
     @Override
     public void start() {
-        this.cartService = new CartServiceImpl(vertx);
         Router router = Router.router(vertx);
         router.get("/").handler(rc-> rc.response().end("Hello from Cart Service"));
         router.get("/services/cart/:cartId").handler(this::getCart);
         router.post("/services/cart/:cartId/:itemId/:quantity").handler(this::addToCart);
         router.post("/services/cart/checkout/:cartId").handler(this::checkout);
         router.delete("/services/cart/:cartId/:itemId/:quantity").handler(this::removeFromCart);
-        router.route().failureHandler(this::handleFailure);
-
 
         vertx.createHttpServer().requestHandler(router::accept).listen(config().getInteger("http.port",8080));
+
+    }
+
+    private void getCart(RoutingContext rc) {
+        String cartId = rc.pathParam("cartId");
+        ShoppingCart cart = getCart(cartId);
+        sendCart(cart,rc);
+
+    }
+
+    private void addToCart(RoutingContext rc) {
+        String cartId = rc.pathParam("cartId");
+        String itemId = rc.pathParam("itemId");
+        int quantity = Integer.parseInt(rc.pathParam("quantity"));
+
+        ShoppingCart cart = getCart(cartId);
+
+        boolean productAlreadyInCart = cart.getShoppingCartItemList().stream()
+            .anyMatch(i -> i.getProduct().getItemId().equals(itemId));
+
+
+        if(productAlreadyInCart) {
+            cart.getShoppingCartItemList().forEach(item -> {
+                if (item.getProduct().getItemId().equals(itemId)) {
+                    item.setQuantity(item.getQuantity() + quantity);
+                    sendCart(cart,rc);
+                }
+            });
+        } else {
+            ShoppingCartItem newItem = new ShoppingCartItemImpl();
+            newItem.setQuantity(quantity);
+            Future<Product> future = getProduct(itemId);
+            future.setHandler(ar -> {
+                if (ar.succeeded()) {
+                    newItem.setProduct(ar.result());
+                    cart.addShoppingCartItem(newItem);
+                    sendCart(cart,rc);
+                } else {
+                    sendError(500,rc);
+                }
+            });
+        }
+
+
+
+//        cartService.addItems(cartId,itemId,quantity,reply -> {
+//            if(reply.succeeded()) {
+//                rc.response()
+//                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+//                    .end(reply.result().encodePrettily());
+//            }});
 
     }
 
@@ -35,67 +93,71 @@ public class MainVerticle extends AbstractVerticle {
         int quantity = Integer.parseInt(rc.pathParam("quantity"));
 
 
-        cartService.removeItems(cartId,itemId,quantity,reply -> rc.response()
-                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
-                    .end(reply.result().encodePrettily()));
+        ShoppingCart cart = getCart(cartId);
+
+        //If all quantity with the same Id should be removed then remove it from the list completely. The is the normal use-case
+        cart.getShoppingCartItemList().removeIf(i -> i.getProduct().getItemId().equals(itemId) && i.getQuantity()<=quantity);
+
+        //If not all quantities should be removed we need to update the list
+        cart.getShoppingCartItemList().forEach(i ->  {
+                if(i.getProduct().getItemId().equals(itemId))
+                    i.setQuantity(i.getQuantity()-quantity);
+            }
+        );
+
+        sendCart(cart,rc);
 
     }
 
     private void checkout(RoutingContext rc) {
         String cartId = rc.pathParam("cartId");
 
-        cartService.checkout(cartId,reply -> rc.response()
+        //TODO
+    }
+
+    private static void sendCart(ShoppingCart cart, RoutingContext rc) {
+        rc.response()
             .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
-            .end(reply.result().encodePrettily()));
+            .end(Transformers.shoppingCartToJson(cart).encodePrettily());
     }
 
-    private void getCart(RoutingContext rc) {
-        String cartId = rc.pathParam("cartId");
 
-        JsonObject request = new JsonObject();
-        request.put("cartId",cartId);
-
-        cartService.getCart(cartId,reply -> rc.response()
-            .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
-            .end(reply.result().encodePrettily()));
-
-
+    private static void sendError(int statusCode, RoutingContext rc) {
+        rc.response().setStatusCode(statusCode).end();
     }
 
-    private void addToCart(RoutingContext rc) {
-        String cartId = rc.pathParam("cartId");
-        String itemId = rc.pathParam("itemId");
-        int quantity = Integer.parseInt(rc.pathParam("quantity"));
+    private Future<Product> getProduct(String itemId) {
+        WebClient client = WebClient.create(vertx);
+        Context context = Vertx.currentContext();
+        Future<Product> future = Future.future();
+        Integer port = context.config().getInteger("catalog.service.port", 8080);
+        String hostname = context.config().getString("catalog.service.hostname", "localhost");
+        Integer timeout = context.config().getInteger("catalog.service.timeout", 0);
+        client.get(port, hostname,"/services/product/"+itemId)
+            .timeout(timeout)
+            .send(handler -> {
+                if(handler.succeeded()) {
+                    future.complete(Transformers.jsonToProduct(handler.result().body().toJsonObject()));
+                } else {
+                    future.fail(new RuntimeException("Failed to get Product from the catalog service"));
+                }
 
-        cartService.addItems(cartId,itemId,quantity,reply -> {
-            if(reply.succeeded()) {
-                rc.response()
-                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
-                    .end(reply.result().encodePrettily());
-            }});
 
+            });
+        return future;
     }
 
-    private void handleFailure(RoutingContext ctx) {
-        Throwable exception = ctx.failure();
 
-        final JsonObject error = new JsonObject()
-            .put("timestamp", System.nanoTime())
-            .put("status", 500)
-            .put("error", HttpResponseStatus.valueOf(500).reasonPhrase())
-            .put("path", ctx.normalisedPath())
-            .put("exception", exception.getClass().getName());
-
-        if(exception.getMessage() != null) {
-            error.put("message", exception.getMessage());
+    private static ShoppingCart getCart(String cartId) {
+        if(carts.containsKey(cartId)) {
+            return carts.get(cartId);
+        } else {
+            ShoppingCart cart = new ShoppingCartImpl();
+            carts.put(cartId,cart);
+            return cart;
         }
 
-        ctx.response().setStatusCode(500);
-        ctx.response().end(error.encode());
-
-
     }
-
 
 }
 
