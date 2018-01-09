@@ -60,10 +60,6 @@
 
         <!-- TODO: Add actuator, fegin and hystrix dependency here -->
 
-        <!-- TODO: Add feign dependency here -->
-
-        <!-- TODO: Add hystrix dependency here -->
-
 
         <!-- Testing -->
         <dependency>
