@@ -1,17 +1,22 @@
 package com.redhat.coolstore;
 
 import com.redhat.coolstore.model.*;
+import com.redhat.coolstore.utils.Generator;
 import com.redhat.coolstore.utils.Transformers;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
+import io.vertx.config.ConfigRetriever;
+import io.vertx.config.ConfigRetrieverOptions;
+import io.vertx.config.ConfigStoreOptions;
+import io.vertx.core.*;
 import io.vertx.core.http.HttpHeaders;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.WebClient;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MainVerticle extends AbstractVerticle {
@@ -21,10 +26,18 @@ public class MainVerticle extends AbstractVerticle {
      */
     private final static Map<String,ShoppingCart> carts = new ConcurrentHashMap<>();
 
+    static {
+        carts.put("99999", Generator.generateShoppingCart());
+    }
+
+
+    private ConfigRetriever retriever;
 
 
     @Override
     public void start() {
+
+
         Router router = Router.router(vertx);
         router.get("/").handler(rc-> rc.response().end("Hello from Cart Service"));
         router.get("/services/cart/:cartId").handler(this::getCart);
@@ -32,7 +45,16 @@ public class MainVerticle extends AbstractVerticle {
         router.post("/services/cart/checkout/:cartId").handler(this::checkout);
         router.delete("/services/cart/:cartId/:itemId/:quantity").handler(this::removeFromCart);
 
-        vertx.createHttpServer().requestHandler(router::accept).listen(config().getInteger("http.port",8080));
+
+        setupConfiguration().setHandler(handler -> {
+            if(handler.succeeded()) {
+                Integer serverPort = config().getInteger("http.port", 8080);
+                System.out.println("Starting the HTTP Server on port " + serverPort);
+                vertx.createHttpServer().requestHandler(router::accept).listen(serverPort);
+            } else {
+                System.out.println("Failed to Start HTTP Server with reason: " + handler.cause());
+            }
+        });
 
     }
 
@@ -77,14 +99,6 @@ public class MainVerticle extends AbstractVerticle {
         }
 
 
-
-//        cartService.addItems(cartId,itemId,quantity,reply -> {
-//            if(reply.succeeded()) {
-//                rc.response()
-//                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
-//                    .end(reply.result().encodePrettily());
-//            }});
-
     }
 
     private void removeFromCart(RoutingContext rc) {
@@ -128,11 +142,11 @@ public class MainVerticle extends AbstractVerticle {
 
     private Future<Product> getProduct(String itemId) {
         WebClient client = WebClient.create(vertx);
-        Context context = Vertx.currentContext();
+        //Context context = Vertx.currentContext();
         Future<Product> future = Future.future();
-        Integer port = context.config().getInteger("catalog.service.port", 8080);
-        String hostname = context.config().getString("catalog.service.hostname", "localhost");
-        Integer timeout = context.config().getInteger("catalog.service.timeout", 0);
+        Integer port = config().getInteger("catalog.service.port", 8080);
+        String hostname = config().getString("catalog.service.hostname", "localhost");
+        Integer timeout = config().getInteger("catalog.service.timeout", 0);
         client.get(port, hostname,"/services/product/"+itemId)
             .timeout(timeout)
             .send(handler -> {
@@ -158,6 +172,48 @@ public class MainVerticle extends AbstractVerticle {
         }
 
     }
+
+    private Future<Void> setupConfiguration() {
+        Future<Void> future = Future.future();
+        ConfigStoreOptions defaultFileStore = new ConfigStoreOptions()
+            .setType("file")
+            .setConfig(new JsonObject().put("path", "config-default.json"));
+        ConfigRetrieverOptions options = new ConfigRetrieverOptions();
+        options.addStore(defaultFileStore);
+        String profilesStr = System.getProperty("vertx.profiles.active");
+        if(profilesStr!=null && profilesStr.length()>0) {
+            Arrays.asList(profilesStr.split(",")).stream().forEach(s -> {
+                options.addStore(new ConfigStoreOptions()
+                .setType("file")
+                .setConfig(new JsonObject().put("path", "config-" + s + ".json")));
+            });
+        }
+        retriever = ConfigRetriever.create(vertx, options);
+
+        retriever.getConfig((AsyncResult<JsonObject> ar) -> {
+            if (ar.succeeded()) {
+                JsonObject result = ar.result();
+                result.fieldNames().forEach(s -> {
+                    config().put(s, result.getValue(s));
+                });
+                future.complete();
+            } else {
+                future.fail("Failed to read configuration");
+            }
+
+        });
+        return future;
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        BlockingQueue<AsyncResult<String>> q = new ArrayBlockingQueue<>(1);
+        Vertx.vertx().deployVerticle(new MainVerticle(), q::offer);
+        AsyncResult<String> result = q.take();
+        if (result.failed()) {
+            throw new RuntimeException(result.cause());
+        }
+    }
+
 
 }
 

@@ -1,6 +1,9 @@
 package com.redhat.coolstore.model;
 
+import org.apache.commons.math3.util.Precision;
+
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -63,7 +66,7 @@ public class ShoppingCartImpl implements Serializable, ShoppingCart {
 
 	@Override
     public double getCartItemTotal() {
-		return this.getShoppingCartItemList().stream().mapToDouble(i -> i.getQuantity()*i.getProduct().getPrice()).sum();
+		return Precision.round(this.getShoppingCartItemList().stream().mapToDouble(i -> i.getQuantity()*i.getProduct().getPrice()).sum(),2, BigDecimal.ROUND_HALF_UP);
 	}
 
 	@Override
@@ -79,13 +82,13 @@ public class ShoppingCartImpl implements Serializable, ShoppingCart {
 
     @Override
     public double getCartTotal() {
-		return this.getCartItemTotal()+this.getShippingTotal()+this.getShippingPromoSavings()+this.getCartItemPromoSavings();
+		return Precision.round(this.getCartItemTotal()+this.getShippingTotal()+this.getShippingPromoSavings()+this.getCartItemPromoSavings(),2, BigDecimal.ROUND_HALF_UP);
 	}
 
 
 	@Override
     public double getCartItemPromoSavings() {
-		return this.getShoppingCartItemList().stream().mapToDouble(i -> i.getPromoSavings()*i.getQuantity()).sum();
+		return Precision.round(this.getShoppingCartItemList().stream().mapToDouble(i -> i.getPromoSavings()*i.getQuantity()).sum(),2, BigDecimal.ROUND_HALF_UP);
 	}
 
     @Override

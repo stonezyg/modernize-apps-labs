@@ -40,20 +40,11 @@
             <groupId>io.vertx</groupId>
             <artifactId>vertx-config</artifactId>
         </dependency>
-        <!--<dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-service-proxy</artifactId>
-        </dependency>
         <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-codegen</artifactId>
-            <scope>provided</scope>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6</version>
         </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-service-proxy</artifactId>
-            <classifier>processor</classifier>
-        </dependency>-->
 
         <!--Testing-->
         <dependency>
@@ -82,9 +73,6 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                    <!--<annotationProcessors>
-                        <annotationProcessor>io.vertx.serviceproxy.ServiceProxyProcessor</annotationProcessor>
-                    </annotationProcessors>-->
                 </configuration>
             </plugin>
             <plugin>
@@ -100,10 +88,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <redeploy>true</redeploy>
-                    <config>src/main/resources/config.json</config>
-                </configuration>
             </plugin>
         </plugins>
     </build>
