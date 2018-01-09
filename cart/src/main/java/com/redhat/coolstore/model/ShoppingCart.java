@@ -27,5 +27,8 @@ public interface ShoppingCart {
 
     void setShippingPromoSavings(double shippingPromoSavings);
 
+    void clear();
+
+
 
 }

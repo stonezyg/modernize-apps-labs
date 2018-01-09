@@ -111,8 +111,8 @@ public class MainVerticle extends AbstractVerticle {
 
     private void checkout(RoutingContext rc) {
         String cartId = rc.pathParam("cartId");
-
-        //TODO
+        //TODO send the shopping cart to order
+        getCart(cartId).clear();
     }
 
     private static void sendCart(ShoppingCart cart, RoutingContext rc) {

@@ -99,6 +99,13 @@ public class ShoppingCartImpl implements Serializable, ShoppingCart {
     }
 
     @Override
+    public void clear() {
+        shoppingCartItemList = new ArrayList<>();
+        shippingTotal = 0;
+        shippingPromoSavings = 0;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
