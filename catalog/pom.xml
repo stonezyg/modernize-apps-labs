@@ -60,7 +60,6 @@
 
         <!-- TODO: Add actuator, fegin and hystrix dependency here -->
 
-
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
