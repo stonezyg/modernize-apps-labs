@@ -506,12 +506,12 @@
                 "name": "ci_admin"
             },
             "groupNames": [
-                "system:serviceaccounts:ci"
+                "system:serviceaccounts:coolstore-prod"
             ],
             "subjects": [
                 {
                     "kind": "SystemGroup",
-                    "name": "system:serviceaccounts:ci"
+                    "name": "system:serviceaccounts:coolstore-prod"
                 }
             ],
             "roleRef": {
