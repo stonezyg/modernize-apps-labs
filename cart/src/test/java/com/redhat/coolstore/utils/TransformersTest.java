@@ -1,9 +1,11 @@
 package com.redhat.coolstore.utils;
 
 import com.redhat.coolstore.model.*;
+import com.redhat.coolstore.model.impl.ProductImpl;
+import com.redhat.coolstore.model.impl.ShoppingCartImpl;
+import com.redhat.coolstore.model.impl.ShoppingCartItemImpl;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -44,11 +46,6 @@ public class TransformersTest {
         "  } ]\n" +
         "}";
 
-    @Before
-    public void setup() {
-//        System.out.println("Transformers.shoppingCartToJson(generateShoppingCart()).encodePrettily() = " + Transformers.shoppingCartToJson(generateShoppingCart()).encodePrettily());
-    }
-
     @Test
     public void shoppingCartToJson() {
         ShoppingCart originalCart = generateShoppingCart();
@@ -59,7 +56,7 @@ public class TransformersTest {
 
         ShoppingCart newCart = Transformers.jsonToShoppingCart(scJson);
         assertThat(newCart).as("Make sure that transformed ShoppingCart isn't Null").isNotNull();
-        assertThat(newCart.getShoppingCartItemList()).as("Make sure that transformated ShoppingCart has Items").isNotEmpty();
+        assertThat(newCart.getShoppingCartItemList()).as("Make sure that the transformed ShoppingCart has Items").isNotEmpty();
         assertThat(originalCart).as("Compare Original Shopping Cart with Shopping Cart after double transformation").isEqualTo(newCart);
 
 

@@ -1,4 +1,6 @@
-package com.redhat.coolstore.model;
+package com.redhat.coolstore.model.impl;
+
+import com.redhat.coolstore.model.Product;
 
 import java.io.Serializable;
 import java.util.Objects;

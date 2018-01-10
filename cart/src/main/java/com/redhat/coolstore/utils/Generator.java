@@ -1,6 +1,9 @@
 package com.redhat.coolstore.utils;
 
 import com.redhat.coolstore.model.*;
+import com.redhat.coolstore.model.impl.ProductImpl;
+import com.redhat.coolstore.model.impl.ShoppingCartImpl;
+import com.redhat.coolstore.model.impl.ShoppingCartItemImpl;
 import org.apache.commons.math3.util.Precision;
 
 import java.math.BigDecimal;
@@ -21,9 +24,7 @@ public final class Generator {
         cart.setShippingTotal(round(ThreadLocalRandom.current().nextDouble(50, 100)));
         cart.setShippingPromoSavings(round(ThreadLocalRandom.current().nextDouble(0, 50)));
         int numberOfItem = ThreadLocalRandom.current().nextInt(1,9);
-        IntStream.range(0,numberOfItem).forEach( i -> {
-            cart.addShoppingCartItem(generateItem(i));
-        });
+        IntStream.range(0,numberOfItem).forEach( i -> cart.addShoppingCartItem(generateItem(i)));
 
         return cart;
 

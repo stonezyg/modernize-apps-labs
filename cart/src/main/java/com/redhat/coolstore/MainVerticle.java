@@ -1,6 +1,8 @@
 package com.redhat.coolstore;
 
 import com.redhat.coolstore.model.*;
+import com.redhat.coolstore.model.impl.ShoppingCartImpl;
+import com.redhat.coolstore.model.impl.ShoppingCartItemImpl;
 import com.redhat.coolstore.utils.Generator;
 import com.redhat.coolstore.utils.Transformers;
 import io.vertx.config.ConfigRetriever;
@@ -29,9 +31,6 @@ public class MainVerticle extends AbstractVerticle {
     static {
         carts.put("99999", Generator.generateShoppingCart());
     }
-
-
-    private ConfigRetriever retriever;
 
 
     @Override
@@ -93,7 +92,7 @@ public class MainVerticle extends AbstractVerticle {
                     cart.addShoppingCartItem(newItem);
                     sendCart(cart,rc);
                 } else {
-                    sendError(500,rc);
+                    sendError(rc);
                 }
             });
         }
@@ -136,8 +135,8 @@ public class MainVerticle extends AbstractVerticle {
     }
 
 
-    private static void sendError(int statusCode, RoutingContext rc) {
-        rc.response().setStatusCode(statusCode).end();
+    private static void sendError(RoutingContext rc) {
+        rc.response().setStatusCode(500).end();
     }
 
     private Future<Product> getProduct(String itemId) {
@@ -182,20 +181,16 @@ public class MainVerticle extends AbstractVerticle {
         options.addStore(defaultFileStore);
         String profilesStr = System.getProperty("vertx.profiles.active");
         if(profilesStr!=null && profilesStr.length()>0) {
-            Arrays.asList(profilesStr.split(",")).stream().forEach(s -> {
-                options.addStore(new ConfigStoreOptions()
-                .setType("file")
-                .setConfig(new JsonObject().put("path", "config-" + s + ".json")));
-            });
+            Arrays.stream(profilesStr.split(",")).forEach(s -> options.addStore(new ConfigStoreOptions()
+            .setType("file")
+            .setConfig(new JsonObject().put("path", "config-" + s + ".json"))));
         }
-        retriever = ConfigRetriever.create(vertx, options);
+        ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
 
         retriever.getConfig((AsyncResult<JsonObject> ar) -> {
             if (ar.succeeded()) {
                 JsonObject result = ar.result();
-                result.fieldNames().forEach(s -> {
-                    config().put(s, result.getValue(s));
-                });
+                result.fieldNames().forEach(s -> config().put(s, result.getValue(s)));
                 future.complete();
             } else {
                 future.fail("Failed to read configuration");

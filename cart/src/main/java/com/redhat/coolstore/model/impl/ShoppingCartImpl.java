@@ -1,5 +1,7 @@
-package com.redhat.coolstore.model;
+package com.redhat.coolstore.model.impl;
 
+import com.redhat.coolstore.model.ShoppingCart;
+import com.redhat.coolstore.model.ShoppingCartItem;
 import org.apache.commons.math3.util.Precision;
 
 import java.io.Serializable;
@@ -12,7 +14,7 @@ public class ShoppingCartImpl implements Serializable, ShoppingCart {
 
 	private static final long serialVersionUID = -1108043957592113528L;
 
-	private List<ShoppingCartItem> shoppingCartItemList = new ArrayList<ShoppingCartItem>();
+	private List<ShoppingCartItem> shoppingCartItemList = new ArrayList<>();
 
 	private double shippingTotal;
 
@@ -34,7 +36,7 @@ public class ShoppingCartImpl implements Serializable, ShoppingCart {
 
 	@Override
     public void resetShoppingCartItemList() {
-		shoppingCartItemList = new ArrayList<ShoppingCartItem>();
+		shoppingCartItemList = new ArrayList<>();
 	}
 
 	@Override
