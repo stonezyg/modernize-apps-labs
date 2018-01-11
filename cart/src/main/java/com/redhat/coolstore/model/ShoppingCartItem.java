@@ -14,11 +14,8 @@ public interface ShoppingCartItem {
 
     /**
      * Sets the number of this product in the shopping cart
-     * @param quantity
+     * @param quantity the number of products of this type
      */
     void setQuantity(int quantity);
 
-    double getPromoSavings();
-
-    void setPromoSavings(double promoSavings);
 }

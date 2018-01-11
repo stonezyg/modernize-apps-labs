@@ -1,9 +1,8 @@
 package com.redhat.coolstore.model;
 
-/**
- * Created by tqvarnst on 2017-03-30.
- */
+
 public interface Product {
+
     String getItemId();
 
     void setItemId(String itemId);

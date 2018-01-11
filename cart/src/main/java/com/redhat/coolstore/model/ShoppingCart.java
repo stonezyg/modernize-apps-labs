@@ -7,11 +7,11 @@ public interface ShoppingCart {
 
     void setShoppingCartItemList(List<ShoppingCartItem> shoppingCartItemList);
 
-    void resetShoppingCartItemList();
+    String getCartId();
+
+    void setCartId(String cartId);
 
     void addShoppingCartItem(ShoppingCartItem sci);
-
-    boolean removeShoppingCartItem(ShoppingCartItem sci);
 
     double getCartItemTotal();
 
@@ -22,6 +22,8 @@ public interface ShoppingCart {
     double getCartTotal();
 
     double getCartItemPromoSavings();
+
+    void setCartItemPromoSavings(double cartItemPromoSavings);
 
     double getShippingPromoSavings();
 

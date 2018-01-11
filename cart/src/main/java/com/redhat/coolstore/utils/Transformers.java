@@ -1,41 +1,32 @@
 package com.redhat.coolstore.utils;
 
 import com.redhat.coolstore.model.*;
+import com.redhat.coolstore.model.impl.ProductImpl;
+import com.redhat.coolstore.model.impl.ShoppingCartImpl;
+import com.redhat.coolstore.model.impl.ShoppingCartItemImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Transformers {
 
-//    private static final String[] RANDOM_NAMES = {"Sven Karlsson","Johan Andersson","Karl Svensson","Anders Johansson","Stefan Olson","Martin Ericsson"};
-//    private static final String[] RANDOM_EMAILS = {"sven@gmail.com","johan@gmail.com","karl@gmail.com","anders@gmail.com","stefan@gmail.com","martin@gmail.com"};
-
     public static JsonObject shoppingCartToJson(ShoppingCart cart) {
         JsonArray cartItems = new JsonArray();
-        cart.getShoppingCartItemList().forEach(item -> {
-            cartItems.add(new JsonObject()
-                .put("product",productToJson(item.getProduct()))
-                .put("promoSavings",item.getPromoSavings())
-                .put("quantity",item.getQuantity())
-            );
-        });
+        cart.getShoppingCartItemList().forEach(item -> cartItems.add(new JsonObject()
+            .put("product",productToJson(item.getProduct()))
+            .put("quantity",item.getQuantity())
+        ));
 
-//        int randomNameAndEmailIndex = ThreadLocalRandom.current().nextInt(RANDOM_NAMES.length);
-
-        JsonObject jsonObject = new JsonObject()
-            .put("orderValue", new Double(cart.getCartTotal()))
-//            .put("customerName",RANDOM_NAMES[randomNameAndEmailIndex])
-//            .put("customerEmail",RANDOM_EMAILS[randomNameAndEmailIndex])
+        return new JsonObject()
+            .put("cartId",cart.getCartId())
+            .put("orderValue", cart.getCartTotal())
             .put("retailPrice", cart.getCartItemTotal())
-            .put("discount", new Double(cart.getCartItemPromoSavings()))
-            .put("shippingFee", new Double(cart.getShippingTotal()))
-            .put("shippingDiscount", new Double(cart.getShippingPromoSavings()))
+            .put("discount", cart.getCartItemPromoSavings())
+            .put("shippingFee", cart.getShippingTotal())
+            .put("shippingDiscount", cart.getShippingPromoSavings())
             .put("items",cartItems);
-
-        return jsonObject;
     }
 
 
@@ -47,10 +38,11 @@ public class Transformers {
             ShoppingCartItem sci = new ShoppingCartItemImpl();
             sci.setQuantity(itemJson.getInteger("quantity"));
             sci.setProduct(jsonToProduct(itemJson.getJsonObject("product")));
-            sci.setPromoSavings(itemJson.getDouble("promoSavings"));
             sciList.add(sci);
         });
+        sc.setCartId(json.getString("cartId"));
         sc.setShoppingCartItemList(sciList);
+        sc.setCartItemPromoSavings(json.getDouble("discount"));
         sc.setShippingPromoSavings(json.getDouble("shippingDiscount"));
         sc.setShippingTotal(json.getDouble("shippingFee"));
         return sc;
@@ -68,7 +60,7 @@ public class Transformers {
         return product;
     }
 
-    public static JsonObject productToJson(Product product) {
+    private static JsonObject productToJson(Product product) {
         JsonObject json = new JsonObject();
         json.put("itemId",product.getItemId());
         json.put("price",product.getPrice());

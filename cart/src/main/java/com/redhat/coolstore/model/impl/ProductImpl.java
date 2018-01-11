@@ -1,4 +1,6 @@
-package com.redhat.coolstore.model;
+package com.redhat.coolstore.model.impl;
+
+import com.redhat.coolstore.model.Product;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -101,12 +103,12 @@ public class ProductImpl implements Product, Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ProductImpl product = (ProductImpl) o;
-        return Double.compare(product.price, price) == 0 &&
-            Objects.equals(itemId, product.itemId) &&
-            Objects.equals(name, product.name) &&
-            Objects.equals(desc, product.desc) &&
-            Objects.equals(location, product.location) &&
-            Objects.equals(link, product.link);
+        return Double.compare(product.getPrice(), getPrice()) == 0 &&
+            Objects.equals(getItemId(), product.getItemId()) &&
+            Objects.equals(getName(), product.getName()) &&
+            Objects.equals(getDesc(), product.getDesc()) &&
+            Objects.equals(getLocation(), product.getLocation()) &&
+            Objects.equals(getLink(), product.getLink());
     }
 
     @Override
