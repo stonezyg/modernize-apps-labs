@@ -28,16 +28,7 @@ public class ProductRepository {
     }
 
     public Product findById(String id) {
-        return jdbcTemplate.queryForObject("SELECT * FROM catalog WHERE itemId = " + id, rowMapper);
+        return jdbcTemplate.queryForObject("SELECT * FROM catalog WHERE itemId = '" + id + "'", rowMapper);
     }
-
-    public void insert(Product product) {
-        jdbcTemplate.update("INSERT INTO catalog (itemId, name, description, price) VALUES (?, ?, ?, ?)",
-                product.getItemId(),
-                product.getName(),
-                product.getDesc(),
-                product.getPrice());
-    }
-
 
 }
