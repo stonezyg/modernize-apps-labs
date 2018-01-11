@@ -10,7 +10,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -43,6 +42,7 @@ public class Transformers {
             prod.setQuantity(entity.getInventory().getQuantity());
         } else {
             log.warning("Inventory for " + entity.getName() + "[" + entity.getItemId()+ "] unknown and missing");
+            // TODO: add Inventory
         }
         return prod;
     }
