@@ -31,7 +31,7 @@ public class ShoppingCartService {
     PromoService ps;
 
     @Inject
-    private JMSContext context;
+    private transient JMSContext context;
 
     @Resource(lookup = "java:/topic/orders")
     private Topic ordersTopic;
