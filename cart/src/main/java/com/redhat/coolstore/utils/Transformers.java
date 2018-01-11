@@ -42,6 +42,7 @@ public class Transformers {
         });
         sc.setCartId(json.getString("cartId"));
         sc.setShoppingCartItemList(sciList);
+        sc.setCartItemPromoSavings(json.getDouble("discount"));
         sc.setShippingPromoSavings(json.getDouble("shippingDiscount"));
         sc.setShippingTotal(json.getDouble("shippingFee"));
         return sc;

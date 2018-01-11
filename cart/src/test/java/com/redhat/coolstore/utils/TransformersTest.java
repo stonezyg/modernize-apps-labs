@@ -69,7 +69,7 @@ public class TransformersTest {
         assertThat(shoppingCart.getShippingTotal()).isEqualTo(100.0);
         assertThat(shoppingCart.getShippingPromoSavings()).isEqualTo(0.0);
         assertThat(shoppingCart.getCartItemPromoSavings()).isEqualTo(-35.0);
-        assertThat(shoppingCart.getCartTotal()).isEqualTo(465.0);
+        assertThat(shoppingCart.getCartTotal()).isEqualTo(475.0);
         assertThat(shoppingCart.getShoppingCartItemList()).isNotEmpty();
         assertThat(shoppingCart.getShoppingCartItemList()).extracting("product.itemId","quantity")
             .contains(tuple("00001",2))
