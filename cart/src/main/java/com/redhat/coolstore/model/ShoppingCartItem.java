@@ -18,7 +18,4 @@ public interface ShoppingCartItem {
      */
     void setQuantity(int quantity);
 
-    double getPromoSavings();
-
-    void setPromoSavings(double promoSavings);
 }

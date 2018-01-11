@@ -2,6 +2,7 @@ package com.redhat.coolstore.model;
 
 
 public interface Product {
+
     String getItemId();
 
     void setItemId(String itemId);

@@ -12,15 +12,17 @@ import org.junit.runner.RunWith;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
+@SuppressWarnings("WeakerAccess")
 @RunWith(VertxUnitRunner.class)
 public class TransformersTest {
 
     private static final String SC_JSON = "{\n" +
-        "  \"orderValue\" : 465.0,\n" +
+        "  \"cartId\" : \"23456\",\n" +
+        "  \"orderValue\" : 475.0,\n" +
         "  \"retailPrice\" : 410.0,\n" +
         "  \"discount\" : -35.0,\n" +
         "  \"shippingFee\" : 100.0,\n" +
-        "  \"shippingDiscount\" : -10.0,\n" +
+        "  \"shippingDiscount\" : 0.0,\n" +
         "  \"items\" : [ {\n" +
         "    \"product\" : {\n" +
         "      \"itemId\" : \"00001\",\n" +
@@ -30,7 +32,6 @@ public class TransformersTest {
         "      \"location\" : \"Stockholm/Sweden\",\n" +
         "      \"link\" : \"http://fakeproduct.me\"\n" +
         "    },\n" +
-        "    \"promoSavings\" : -10.0,\n" +
         "    \"quantity\" : 2\n" +
         "  }, {\n" +
         "    \"product\" : {\n" +
@@ -41,7 +42,6 @@ public class TransformersTest {
         "      \"location\" : \"Stockholm/Sweden\",\n" +
         "      \"link\" : \"http://fakeproduct.me\"\n" +
         "    },\n" +
-        "    \"promoSavings\" : -5.0,\n" +
         "    \"quantity\" : 3\n" +
         "  } ]\n" +
         "}";
@@ -59,8 +59,6 @@ public class TransformersTest {
         assertThat(newCart.getShoppingCartItemList()).as("Make sure that the transformed ShoppingCart has Items").isNotEmpty();
         assertThat(originalCart).as("Compare Original Shopping Cart with Shopping Cart after double transformation").isEqualTo(newCart);
 
-
-
     }
 
     @Test
@@ -69,23 +67,23 @@ public class TransformersTest {
         assertThat(shoppingCart).isNotNull();
         assertThat(shoppingCart.getCartItemTotal()).isEqualTo(410.0);
         assertThat(shoppingCart.getShippingTotal()).isEqualTo(100.0);
-        assertThat(shoppingCart.getShippingPromoSavings()).isEqualTo(-10.0);
+        assertThat(shoppingCart.getShippingPromoSavings()).isEqualTo(0.0);
         assertThat(shoppingCart.getCartItemPromoSavings()).isEqualTo(-35.0);
         assertThat(shoppingCart.getCartTotal()).isEqualTo(465.0);
         assertThat(shoppingCart.getShoppingCartItemList()).isNotEmpty();
-        assertThat(shoppingCart.getShoppingCartItemList()).extracting("product.itemId","promoSavings","quantity")
-            .contains(tuple("00001",-10.0,2))
-            .contains(tuple("00002",-5.0,3));
+        assertThat(shoppingCart.getShoppingCartItemList()).extracting("product.itemId","quantity")
+            .contains(tuple("00001",2))
+            .contains(tuple("00002",3));
     }
 
     private static ShoppingCart generateShoppingCart() {
         ShoppingCart sc = new ShoppingCartImpl();
+        sc.setCartId("23456");
+        sc.setCartItemPromoSavings(-35.0);
         sc.setShippingTotal(100.0);
-        sc.setShippingPromoSavings(-10.0);
 
         ShoppingCartItem sci1 = new ShoppingCartItemImpl();
         sci1.setQuantity(2);
-        sci1.setPromoSavings(-10.0);
         Product prod1 = new ProductImpl();
         prod1.setItemId("00001");
         prod1.setName("Fake product");
@@ -98,7 +96,6 @@ public class TransformersTest {
 
         ShoppingCartItem sci2 = new ShoppingCartItemImpl();
         sci2.setQuantity(3);
-        sci2.setPromoSavings(-5.0);
         Product prod2 = new ProductImpl();
         prod2.setItemId("00002");
         prod2.setName("Fake product 2");

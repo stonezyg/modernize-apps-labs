@@ -16,7 +16,11 @@ public class ShoppingCartImpl implements Serializable, ShoppingCart {
 
 	private List<ShoppingCartItem> shoppingCartItemList = new ArrayList<>();
 
+	private String cartId;
+
 	private double shippingTotal;
+
+	private double cartItemPromoSavings;
 
     private double shippingPromoSavings;
 
@@ -34,10 +38,16 @@ public class ShoppingCartImpl implements Serializable, ShoppingCart {
 		this.shoppingCartItemList = shoppingCartItemList;
 	}
 
-	@Override
-    public void resetShoppingCartItemList() {
-		shoppingCartItemList = new ArrayList<>();
-	}
+    @Override
+    public String getCartId() {
+        return cartId;
+    }
+
+    @Override
+    public void setCartId(String cartId) {
+        this.cartId = cartId;
+    }
+
 
 	@Override
     public void addShoppingCartItem(ShoppingCartItem sci) {
@@ -47,21 +57,6 @@ public class ShoppingCartImpl implements Serializable, ShoppingCart {
 			shoppingCartItemList.add(sci);
 
 		}
-
-	}
-
-	@Override
-    public boolean removeShoppingCartItem(ShoppingCartItem sci) {
-
-		boolean removed = false;
-
-		if ( sci != null ) {
-
-			removed = shoppingCartItemList.remove(sci);
-
-		}
-
-		return removed;
 
 	}
 
@@ -84,14 +79,18 @@ public class ShoppingCartImpl implements Serializable, ShoppingCart {
 
     @Override
     public double getCartTotal() {
-		return Precision.round(this.getCartItemTotal()+this.getShippingTotal()+this.getShippingPromoSavings()+this.getCartItemPromoSavings(),2, BigDecimal.ROUND_HALF_UP);
+		return Precision.round(this.getCartItemTotal()+this.getShippingTotal()-Math.abs(this.getShippingPromoSavings())-Math.abs(this.getCartItemPromoSavings()),2, BigDecimal.ROUND_HALF_UP);
 	}
-
 
 	@Override
     public double getCartItemPromoSavings() {
-		return Precision.round(this.getShoppingCartItemList().stream().mapToDouble(i -> i.getPromoSavings()*i.getQuantity()).sum(),2, BigDecimal.ROUND_HALF_UP);
-	}
+        return cartItemPromoSavings;
+    }
+
+    @Override
+    public void setCartItemPromoSavings(double cartItemPromoSavings) {
+        this.cartItemPromoSavings = cartItemPromoSavings;
+    }
 
     @Override
     public double getShippingPromoSavings() {
