@@ -140,7 +140,6 @@ public class CartServiceVerticle extends AbstractVerticle {
                                 sendError(reply.cause().getMessage(),rc);
                             }
                         });
-                    sendCart(cart,rc);
                 } else {
                     sendError(reply.cause().getMessage(),rc);
                 }
