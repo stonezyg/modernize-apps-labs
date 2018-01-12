@@ -48,7 +48,7 @@ public class CartServiceVerticle extends AbstractVerticle {
 
         //Create the routes
         Router router = Router.router(vertx);
-        router.get("/hello").handler(rc-> rc.response().end("Hello from Cart Service"));
+        router.get("/hello").handler(rc-> rc.response().end(new JsonObject().put("message","Hello").encode()));
         router.get("/services/carts").handler(this::getCarts);
         router.get("/services/cart/:cartId").handler(this::getCart);
         router.post("/services/cart/checkout/:cartId").handler(this::checkout);
