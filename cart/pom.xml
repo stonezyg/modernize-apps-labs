@@ -10,7 +10,7 @@
         <vertx.version>3.5.0</vertx.version>
         <java.version>1.8</java.version>
         <vertx-maven-plugin.version>1.0.9</vertx-maven-plugin.version>
-        <vertx.verticle>com.redhat.coolstore.MainVerticle</vertx.verticle>
+        <vertx.verticle>com.redhat.coolstore.CartServiceVerticle</vertx.verticle>
     </properties>
     <dependencyManagement>
         <dependencies>
