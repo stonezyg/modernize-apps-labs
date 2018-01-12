@@ -232,36 +232,6 @@ public class CartServiceVerticle extends AbstractVerticle {
 
     }
 
-//    private Future<Void> setupConfiguration() {
-//        Future<Void> future = Future.future();
-//        ConfigStoreOptions defaultFileStore = new ConfigStoreOptions()
-//            .setType("file")
-//            .setConfig(new JsonObject().put("path", "config-default.json"));
-//        ConfigRetrieverOptions options = new ConfigRetrieverOptions();
-//        options.addStore(defaultFileStore);
-//        String profilesStr = System.getProperty("vertx.profiles.active");
-//        if(profilesStr!=null && profilesStr.length()>0) {
-//            Arrays.stream(profilesStr.split(",")).forEach(s -> options.addStore(new ConfigStoreOptions()
-//            .setType("file")
-//            .setConfig(new JsonObject().put("path", "config-" + s + ".json"))));
-//        }
-//        ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
-//
-//        retriever.getConfig((AsyncResult<JsonObject> ar) -> {
-//            if (ar.succeeded()) {
-//                JsonObject result = ar.result();
-//                result.fieldNames().forEach(s -> config().put(s, result.getValue(s)));
-//                future.complete();
-//            } else {
-//                future.fail("Failed to read configuration");
-//            }
-//
-//        });
-//        return future;
-//    }
-
-
-
 
 }
 
