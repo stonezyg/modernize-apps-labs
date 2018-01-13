@@ -68,13 +68,15 @@ public class ShoppingCartImpl implements Serializable, ShoppingCart {
 
 	@Override
     public double getShippingTotal() {
-		return shippingTotal;
+        return 20.0; //hardocded shipping fee
+
 	}
 
 
     @Override
     public void setShippingTotal(double shippingTotal) {
         this.shippingTotal = shippingTotal;
+
     }
 
     @Override
@@ -94,7 +96,11 @@ public class ShoppingCartImpl implements Serializable, ShoppingCart {
 
     @Override
     public double getShippingPromoSavings() {
-        return shippingPromoSavings;
+        if(this.getCartTotal()>200) {
+            return 0.0;
+        } else {
+            return 20.0;
+        }
     }
 
     @Override

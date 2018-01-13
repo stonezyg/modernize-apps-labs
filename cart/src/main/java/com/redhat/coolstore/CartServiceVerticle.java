@@ -8,7 +8,9 @@ import com.redhat.coolstore.model.impl.ShoppingCartItemImpl;
 import com.redhat.coolstore.utils.Generator;
 import com.redhat.coolstore.utils.Transformers;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
@@ -53,7 +55,7 @@ public class CartServiceVerticle extends AbstractVerticle {
             .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
             .end(new JsonObject().put("message","Hello").encode()));
         router.get("/services/carts").handler(this::getCarts);
-        router.get("/services/cart/:cartId").handler(this::getCart);
+//        router.get("/services/cart/:cartId").handler(this::getCart);
         router.post("/services/cart/checkout/:cartId").handler(this::checkout);
         router.post("/services/cart/:cartId/:itemId/:quantity").handler(this::addToCart);
         router.delete("/services/cart/:cartId/:itemId/:quantity").handler(this::removeShoppingCartItem);
@@ -99,55 +101,25 @@ public class CartServiceVerticle extends AbstractVerticle {
             cart.getShoppingCartItemList().forEach(item -> {
                 if (item.getProduct().getItemId().equals(itemId)) {
                     item.setQuantity(item.getQuantity() + quantity);
-                    updateAndSendCart(cart,rc);
+                    sendCart(cart,rc);
                 }
             });
         } else {
             ShoppingCartItem newItem = new ShoppingCartItemImpl();
             newItem.setQuantity(quantity);
-            Future<Product> future = getProduct(itemId);
-            future.setHandler(ar -> {
-                if (ar.succeeded()) {
-                    newItem.setProduct(ar.result());
-                    cart.addShoppingCartItem(newItem);
-                    updateAndSendCart(cart,rc);
-                } else {
-                    sendError(rc);
-                }
-            });
+            this.getProduct(itemId, reply -> {
+                    if (reply.succeeded()) {
+                        newItem.setProduct(reply.result());
+                        cart.addShoppingCartItem(newItem);
+                        sendCart(cart,rc);
+                    } else {
+                        sendError(rc);
+                    }
+                });
         }
 
     }
 
-    private void updateAndSendCart(ShoppingCart cart, RoutingContext rc) {
-        //Update the promo
-//        DeliveryOptions options = new DeliveryOptions();
-//        options.setSendTimeout(500);
-
-        EventBus eb = vertx.eventBus();
-        //Call Shipping Service
-        eb.send("shipping",
-            Transformers.shoppingCartToJson(cart).encode(),
-            reply -> {
-                if(reply.succeeded()) {
-                    //Update the cart with the ShippingFee
-                    cart.setShippingTotal(new JsonObject(reply.result().body().toString()).getDouble("shippingFee"));
-                    //Call Promo Service
-                    eb.send("promo",
-                        Transformers.shoppingCartToJson(cart).encode(),
-                        reply2 -> {
-                            if(reply2.succeeded()) {
-                                cart.setCartItemPromoSavings(new JsonObject(reply2.result().body().toString()).getDouble("promoValue"));
-                                sendCart(cart,rc);
-                            } else {
-                                sendError(reply.cause().getMessage(),rc);
-                            }
-                        });
-                } else {
-                    sendError(reply.cause().getMessage(),rc);
-                }
-            });
-    }
 
     private void removeShoppingCartItem(RoutingContext rc) {
         logger.info("Retrieved " + rc.request().method().name() + " request to " + rc.request().absoluteURI());
@@ -168,17 +140,36 @@ public class CartServiceVerticle extends AbstractVerticle {
             }
         );
 
-        updateAndSendCart(cart,rc);
+        sendCart(cart,rc);
 
     }
 
-    private void checkout(RoutingContext rc) {
-        logger.info("Retrieved " + rc.request().method().name() + " request to " + rc.request().absoluteURI());
-        String cartId = rc.pathParam("cartId");
-        //TODO send the shopping cart to order
-        ShoppingCart cart = getCart(cartId);
-        cart.clear();
-        updateAndSendCart(cart,rc);
+//    private void checkout(RoutingContext rc) {
+//        logger.info("Retrieved " + rc.request().method().name() + " request to " + rc.request().absoluteURI());
+//        String cartId = rc.pathParam("cartId");
+//        //TODO send the shopping cart to order
+//        ShoppingCart cart = getCart(cartId);
+//        cart.clear();
+//        sendCart(cart,rc);
+//    }
+
+    private void getProduct(String itemId, Handler<AsyncResult<Product>> resultHandler) {
+        WebClient client = WebClient.create(vertx);
+        Integer port = config().getInteger("catalog.service.port", 8080);
+        String hostname = config().getString("catalog.service.hostname", "localhost");
+        Integer timeout = config().getInteger("catalog.service.timeout", 0);
+        client.get(port, hostname,"/services/product/"+itemId)
+            .timeout(timeout)
+            .send(handler -> {
+                if(handler.succeeded()) {
+                    Product product = Transformers.jsonToProduct(handler.result().body().toJsonObject());
+                    resultHandler.handle(Future.succeededFuture(product));
+                } else {
+                    resultHandler.handle(Future.failedFuture(handler.cause()));
+                }
+
+
+            });
     }
 
     private void sendCart(ShoppingCart cart, RoutingContext rc) {
@@ -202,25 +193,6 @@ public class CartServiceVerticle extends AbstractVerticle {
         rc.response().setStatusCode(500).end();
     }
 
-    private Future<Product> getProduct(String itemId) {
-        WebClient client = WebClient.create(vertx);
-        Future<Product> future = Future.future();
-        Integer port = config().getInteger("catalog.service.port", 8080);
-        String hostname = config().getString("catalog.service.hostname", "localhost");
-        Integer timeout = config().getInteger("catalog.service.timeout", 0);
-        client.get(port, hostname,"/services/product/"+itemId)
-            .timeout(timeout)
-            .send(handler -> {
-                if(handler.succeeded()) {
-                    future.complete(Transformers.jsonToProduct(handler.result().body().toJsonObject()));
-                } else {
-                    future.fail(new RuntimeException("Failed to get Product from the catalog service"));
-                }
-
-
-            });
-        return future;
-    }
 
 
     private static ShoppingCart getCart(String cartId) {
