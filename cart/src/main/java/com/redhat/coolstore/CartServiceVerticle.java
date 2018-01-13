@@ -55,8 +55,7 @@ public class CartServiceVerticle extends AbstractVerticle {
             .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
             .end(new JsonObject().put("message","Hello").encode()));
         router.get("/services/carts").handler(this::getCarts);
-//        router.get("/services/cart/:cartId").handler(this::getCart);
-        router.post("/services/cart/checkout/:cartId").handler(this::checkout);
+        router.get("/services/cart/:cartId").handler(this::getCart);
         router.post("/services/cart/:cartId/:itemId/:quantity").handler(this::addToCart);
         router.delete("/services/cart/:cartId/:itemId/:quantity").handler(this::removeShoppingCartItem);
         router.get("/*").handler(StaticHandler.create());
