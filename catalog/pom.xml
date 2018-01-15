@@ -58,7 +58,7 @@
 
         <!-- TODO: Add data jpa dependency here -->
 
-        <!-- TODO: Add actuator, fegin and hystrix dependency here -->
+        <!-- TODO: Add actuator, feign and hystrix dependency here -->
 
         <!-- Testing -->
         <dependency>
