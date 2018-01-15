@@ -109,7 +109,6 @@ public class CartServiceVerticle extends AbstractVerticle {
                         }
 
                     });
-                    //sendCart(cart,rc);
                 }
             });
         } else {
@@ -128,7 +127,6 @@ public class CartServiceVerticle extends AbstractVerticle {
                             }
 
                         });
-                        //sendCart(cart,rc);
                     } else {
                         sendError(rc);
                     }
