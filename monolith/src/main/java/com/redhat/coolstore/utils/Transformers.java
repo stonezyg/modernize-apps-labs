@@ -18,6 +18,7 @@ import javax.json.JsonReader;
 import javax.json.JsonWriter;
 
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Logger;
 
 /**
  * Created by tqvarnst on 2017-03-30.
@@ -26,6 +27,7 @@ public class Transformers {
 
     private static final String[] RANDOM_NAMES = {"Sven Karlsson","Johan Andersson","Karl Svensson","Anders Johansson","Stefan Olson","Martin Ericsson"};
     private static final String[] RANDOM_EMAILS = {"sven@gmail.com","johan@gmail.com","karl@gmail.com","anders@gmail.com","stefan@gmail.com","martin@gmail.com"};
+    private static Logger log = Logger.getLogger(Transformers.class.getName());
 
     public static Product toProduct(CatalogItemEntity entity) {
         ProductImpl prod = new ProductImpl();
@@ -33,9 +35,17 @@ public class Transformers {
         prod.setName(entity.getName());
         prod.setDesc(entity.getDesc());
         prod.setPrice(entity.getPrice());
-        prod.setLocation(entity.getInventory().getLocation());
-        prod.setLink(entity.getInventory().getLink());
-        prod.setQuantity(entity.getInventory().getQuantity());
+        if (entity.getInventory() != null) {
+            prod.setLocation(entity.getInventory().getLocation());
+            prod.setLink(entity.getInventory().getLink());
+            prod.setQuantity(entity.getInventory().getQuantity());
+        } else {
+            log.warning("Inventory for " + entity.getName() + "[" + entity.getItemId()+ "] unknown and missing");
+            // Add inventory if needed and return entity
+            prod.setLink("http://redhat.com");
+            prod.setLocation("Unavailable");
+            prod.setQuantity(0);
+        }
         return prod;
     }
 
