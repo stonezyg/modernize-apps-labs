@@ -84,7 +84,7 @@
 
     <dependencies>
 
-        <!-- Add monitor fraction -->
+<!-- Add monitor fraction -->
 
         <dependency>
             <groupId>org.wildfly.swarm</groupId>

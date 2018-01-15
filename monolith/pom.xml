@@ -50,10 +50,10 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.2.0</version>
             </plugin>
-            <!-- TODO: Add wildfly plugin here -->
+<!-- TODO: Add wildfly plugin here -->
         </plugins>
     </build>
     <profiles>
-        <!-- TODO: Add OpenShift profile here -->
+<!-- TODO: Add OpenShift profile here -->
     </profiles>
 </project>

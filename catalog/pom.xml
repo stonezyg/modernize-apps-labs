@@ -54,11 +54,11 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
-        <!-- TODO: Add web (tomcat) dependency here -->
+<!-- TODO: Add web (tomcat) dependency here -->
 
-        <!-- TODO: Add data jpa dependency here -->
+<!-- TODO: Add data jpa dependency here -->
 
-        <!-- TODO: Add actuator, feign and hystrix dependency here -->
+<!-- TODO: Add actuator, feign and hystrix dependency here -->
 
         <!-- Testing -->
         <dependency>
