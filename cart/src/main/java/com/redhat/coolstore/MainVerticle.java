@@ -21,6 +21,10 @@ public class MainVerticle extends AbstractVerticle {
                     CartServiceVerticle.class.getName(),
                     new DeploymentOptions().setConfig(config.result())
                 );
+                vertx.deployVerticle(
+                    ShippingServiceVerticle.class.getName(),
+                    new DeploymentOptions().setConfig(config.result())
+                );
                 fut.complete();
             });
     }

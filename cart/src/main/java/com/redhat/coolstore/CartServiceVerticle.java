@@ -100,7 +100,16 @@ public class CartServiceVerticle extends AbstractVerticle {
             cart.getShoppingCartItemList().forEach(item -> {
                 if (item.getProduct().getItemId().equals(itemId)) {
                     item.setQuantity(item.getQuantity() + quantity);
-                    sendCart(cart,rc);
+                    this.getShippingFee(cart, message -> {
+                        if(message.succeeded()) {
+                            cart.setShippingTotal(message.result().getDouble("shippingFee"));
+                            sendCart(cart,rc);
+                        } else {
+                            sendError(rc);
+                        }
+
+                    });
+                    //sendCart(cart,rc);
                 }
             });
         } else {
@@ -151,6 +160,21 @@ public class CartServiceVerticle extends AbstractVerticle {
 //        cart.clear();
 //        sendCart(cart,rc);
 //    }
+
+    private void getShippingFee(ShoppingCart cart, Handler<AsyncResult<JsonObject>> resultHandler) {
+        EventBus eb = vertx.eventBus();
+
+        eb.send("shipping",
+            Transformers.shoppingCartToJson(cart).encode(),
+            reply -> {
+                if(reply.succeeded()) {
+                    resultHandler.handle(Future.succeededFuture(new JsonObject().put("shippingFee",reply.result().body())));
+
+                } else {
+                    resultHandler.handle(Future.failedFuture(reply.cause()));
+                }
+            });
+    }
 
     private void getProduct(String itemId, Handler<AsyncResult<Product>> resultHandler) {
         WebClient client = WebClient.create(vertx);
