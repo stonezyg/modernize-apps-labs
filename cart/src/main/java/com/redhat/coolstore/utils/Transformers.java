@@ -21,19 +21,19 @@ public class Transformers {
 
         return new JsonObject()
             .put("cartId",cart.getCartId())
-            .put("orderValue", cart.getCartTotal())
+            .put("cartTotal", cart.getCartTotal())
             .put("retailPrice", cart.getCartItemTotal())
-            .put("discount", cart.getCartItemPromoSavings())
-            .put("shippingFee", cart.getShippingTotal())
-            .put("shippingDiscount", cart.getShippingPromoSavings())
-            .put("items",cartItems);
+            .put("cartItemPromoSavings", cart.getCartItemPromoSavings())
+            .put("shippingTotal", cart.getShippingTotal())
+            .put("shippingPromoSavings", cart.getShippingPromoSavings())
+            .put("shoppingCartItemList",cartItems);
     }
 
 
     public static ShoppingCart jsonToShoppingCart(JsonObject json) {
         ShoppingCart sc = new ShoppingCartImpl();
         List<ShoppingCartItem> sciList = new ArrayList<>();
-        json.getJsonArray("items").forEach(item -> {
+        json.getJsonArray("shoppingCartItemList").forEach(item -> {
             JsonObject itemJson  = (JsonObject) item;
             ShoppingCartItem sci = new ShoppingCartItemImpl();
             sci.setQuantity(itemJson.getInteger("quantity"));
@@ -42,9 +42,9 @@ public class Transformers {
         });
         sc.setCartId(json.getString("cartId"));
         sc.setShoppingCartItemList(sciList);
-        sc.setCartItemPromoSavings(json.getDouble("discount"));
-        sc.setShippingPromoSavings(json.getDouble("shippingDiscount"));
-        sc.setShippingTotal(json.getDouble("shippingFee"));
+        sc.setCartItemPromoSavings(json.getDouble("cartItemPromoSavings"));
+        sc.setShippingPromoSavings(json.getDouble("shippingPromoSavings"));
+        sc.setShippingTotal(json.getDouble("shippingTotal"));
         return sc;
 
     }
