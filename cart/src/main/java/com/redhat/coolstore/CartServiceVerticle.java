@@ -102,7 +102,7 @@ public class CartServiceVerticle extends AbstractVerticle {
                     item.setQuantity(item.getQuantity() + quantity);
                     this.getShippingFee(cart, message -> {
                         if(message.succeeded()) {
-                            cart.setShippingTotal(message.result().getDouble("shippingFee"));
+                            cart.setShippingTotal(message.result());
                             sendCart(cart,rc);
                         } else {
                             sendError(rc);
@@ -119,7 +119,16 @@ public class CartServiceVerticle extends AbstractVerticle {
                     if (reply.succeeded()) {
                         newItem.setProduct(reply.result());
                         cart.addShoppingCartItem(newItem);
-                        sendCart(cart,rc);
+                        this.getShippingFee(cart, message -> {
+                            if(message.succeeded()) {
+                                cart.setShippingTotal(message.result());
+                                sendCart(cart,rc);
+                            } else {
+                                sendError(rc);
+                            }
+
+                        });
+                        //sendCart(cart,rc);
                     } else {
                         sendError(rc);
                     }
@@ -161,14 +170,14 @@ public class CartServiceVerticle extends AbstractVerticle {
 //        sendCart(cart,rc);
 //    }
 
-    private void getShippingFee(ShoppingCart cart, Handler<AsyncResult<JsonObject>> resultHandler) {
+    private void getShippingFee(ShoppingCart cart, Handler<AsyncResult<Double>> resultHandler) {
         EventBus eb = vertx.eventBus();
 
         eb.send("shipping",
             Transformers.shoppingCartToJson(cart).encode(),
             reply -> {
                 if(reply.succeeded()) {
-                    resultHandler.handle(Future.succeededFuture(new JsonObject().put("shippingFee",reply.result().body())));
+                    resultHandler.handle(Future.succeededFuture(((JsonObject)reply.result().body()).getDouble("shippingFee")));
 
                 } else {
                     resultHandler.handle(Future.failedFuture(reply.cause()));
