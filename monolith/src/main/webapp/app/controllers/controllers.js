@@ -14,6 +14,10 @@ angular.module('app')
                     });
                 };
 
+                $scope.isUndefined = function(val) {
+                    return typeof val === 'undefined';
+                };
+
                 $scope.isLoggedIn = function () {
                     return $auth.loggedIn;
                 };
